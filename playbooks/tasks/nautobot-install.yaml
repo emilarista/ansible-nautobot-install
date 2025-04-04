@@ -1,0 +1,17 @@
+# Occasionally this fails due to some django module being missing but then it gets installed later during this cmd execution
+# If this happens, just try to rerun the task.
+- name: Run nautobot install
+  ansible.builtin.command: /opt/nautobot/install.sh
+  become_user: nautobot
+
+# This was the original task, did not work for me due to the prompt.
+# - name: Try to run nautobot collectstatic
+#   ansible.builtin.command: /opt/nautobot/venv/bin/nautobot-server --config /opt/nautobot/nautobot_config.py collectstatic
+#   become_user: nautobot
+
+- name: Run nautobot collectstatic with prompt
+  ansible.builtin.expect:
+    command: /opt/nautobot/venv/bin/nautobot-server --config /opt/nautobot/nautobot_config.py collectstatic
+    responses:
+        "Type 'yes' to continue, or 'no' to cancel:":
+            - "yes"

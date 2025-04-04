@@ -1,0 +1,11 @@
+- name: Clone nautobot from github
+  ansible.builtin.git:
+    repo: https://github.com/nautobot/nautobot.git
+    dest: /opt/nautobot
+    update: yes
+
+- name: Update nautobot config
+  ansible.builtin.template:
+    src: nautobot_config.py
+    dest: /opt/nautobot/nautobot_config.py
+    mode: 0644

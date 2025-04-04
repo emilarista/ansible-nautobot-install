@@ -1,0 +1,14 @@
+- name: Install gunicorn
+  become: true
+  become_user: nautobot
+  ansible.builtin.command: ./pip3 install gunicorn
+  args:
+    chdir: /opt/nautobot/venv/bin
+
+- name: Set up gunicorn
+  ansible.builtin.template:
+    src: gunicorn.py
+    dest: /opt/nautobot/gunicorn.py
+    owner: nautobot
+    group: nautobot
+    mode: 0644

@@ -1,0 +1,75 @@
+- hosts: NAUTOBOT2
+  vars_prompt:
+    - name: db_username
+      prompt: "Database Username"
+      private: false
+    - name: db_password
+      prompt: "Database Password"
+      private: true
+
+  tasks:
+  # - name: Basics
+  #   ansible.builtin.include_tasks:
+  #     file: tasks/basics.yaml
+
+  # - name: Postgresql tasks
+  #   ansible.builtin.include_tasks:
+  #     file: tasks/postgresql.yaml
+
+  # - name: Redis tasks
+  #   ansible.builtin.include_tasks:
+  #     file: tasks/redis.yaml
+
+  - name: System packages
+    ansible.builtin.include_tasks:
+      file: tasks/system-packages.yaml
+
+  # - name: Clone nautobot
+  #   ansible.builtin.include_tasks:
+  #     file: tasks/git.yaml
+
+  # - name: Account creation tasks
+  #   ansible.builtin.include_tasks:
+  #     file: tasks/account.yaml
+
+  - name: Nautobot installation
+    ansible.builtin.include_tasks:
+      file: tasks/nautobot-install.yaml
+
+  - name: Gunicorn tasks
+    ansible.builtin.include_tasks:
+      file: tasks/gunicorn.yaml
+
+  - name: Systemd tasks
+    ansible.builtin.include_tasks:
+      file: tasks/systemd.yaml
+
+  - name: SSL Cert generation
+    ansible.builtin.include_tasks:
+      file: tasks/openssl.yaml
+
+  - name: Nginx tasks
+    ansible.builtin.include_tasks:
+      file: tasks/nginx.yaml
+
+  handlers:
+  - name: Restart nginx
+    ansible.builtin.service:
+      name: nginx
+      state: restarted
+
+  - name: Restart postgresql
+    ansible.builtin.service:
+      name: postgresql
+      state: restarted
+
+  - name: Restart nautobot
+    ansible.builtin.service:
+      name: nautobot
+      state: restarted
+
+  - name: Restart Nautobot-rq
+    ansible.builtin.service:
+      name: nautobot-rq
+      state: restarted
+

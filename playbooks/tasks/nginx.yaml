@@ -1,0 +1,44 @@
+- name: Install nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+
+- name: Create nginx directory structure
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+  - /etc/nginx/sites-available
+  - /etc/nginx/sites-enabled
+
+- name: Mod default nginx config
+  ansible.builtin.template:
+    src:  nginx.conf
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+  - Restart nginx
+
+- name: Configure nginx for nautobot
+  ansible.builtin.template:
+    src: nautobot.conf
+    dest: /etc/nginx/sites-available/nautobot.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Enable nginx for nautobot
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/nautobot.conf
+    dest: /etc/nginx/sites-enabled/nautobot.conf
+    state: link
+  notify:
+  - Restart nginx
+
+- name: Start nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: yes

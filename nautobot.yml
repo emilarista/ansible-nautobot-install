@@ -1,0 +1,79 @@
+---
+- name: Prep nautobot system basics
+  hosts: NAUTOBOT
+  gather_facts: false
+
+  tasks:
+    # - name: Create NB user
+    #   # sudo useradd --system --shell /bin/bash --create-home --home-dir  nautobot
+    #   ansible.builtin.user:
+    #     name: nautobot
+    #     comment: Nautobot user
+    #     shell: /bin/bash
+    #     create_home: yes
+    #     home: /opt/nautobot
+
+    # - name: Run "apt-get update"
+    #   ansible.builtin.apt:
+    #     update_cache: yes
+
+    # - name: install python3-venv
+    #   ansible.builtin.apt:
+    #     name: python3-venv
+    #     state: present
+
+    # - name: Create python venv
+    #   ansible.builtin.command:
+    #     cmd: sudo -u nautobot python3 -m venv /opt/nautobot
+
+    # - name: Add env var to nautobot .bashrc
+    #   lineinfile:
+    #     dest: /opt/nautobot/.bashrc
+    #     line: "export NAUTOBOT_ROOT=/opt/nautobot"
+    #     owner: nautobot
+
+    # - name: install acl, required for the privilege escalation to unprivileged user nautobot to work
+    #   ansible.builtin.apt:
+    #     name: acl
+    #     state: present
+
+    # - name: Update pip and wheel
+    #   become: yes
+    #   become_user: nautobot
+    #   become_method: sudo
+    #   become_flags: "-i"
+    #   ansible.builtin.command:
+    #     cmd: pip3 install --upgrade pip wheel
+
+    # Need the dev tools for the specific interpreter version we are using.
+    - name: install python3.11-dev
+      become: yes
+      # become_user: nautobot
+      become_method: sudo
+      # become_flags: "-i"
+      ansible.builtin.apt:
+        name: python3.11-dev
+        state: present
+
+    # The below might fail if the python3.x-dev package is not installed for the interpreter you are using.
+    - name: Install nautobot # If this doesn't work just do sudo -iu nautobot + pip3 install --no-binary=pyuwsgi nautobot
+      become: yes
+      become_user: nautobot
+      become_method: sudo
+      become_flags: "-i"
+      ansible.builtin.pip:
+        name: nautobot
+        extra_args: --no-binary=pyuwsgi
+
+    - name: check nautobot server version
+      become: yes
+      become_user: nautobot
+      become_method: sudo
+      become_flags: "-i"
+      ansible.builtin.command:
+        cmd: nautobot-server --version
+      register: nautobot_version
+
+    - name: print result
+      debug:
+        msg: "{{ nautobot_version }}"

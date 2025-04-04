@@ -1,0 +1,11 @@
+nautobot:
+  allowed_hosts:
+  - "*"
+  db:
+    name: nautobot
+country: SE
+state: VA
+city: Karlstad
+domain: 10-18-161-158.ce.act.arista.com
+cert_path: /etc/ssl/
+nautobot_port: 8443

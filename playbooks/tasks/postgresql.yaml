@@ -1,0 +1,54 @@
+- name: Install postgresql
+  ansible.builtin.apt:
+    name:
+    - postgresql
+    - libpq-dev
+    state: present
+
+- name: Install python postgresql adapter
+  ansible.builtin.pip:
+    name: psycopg2
+
+- name: Initialize postgresql
+  ansible.builtin.command: postgresql-setup --initdb
+  ignore_errors: true
+
+- name: Start postgresql service
+  ansible.builtin.service:
+    name: postgresql
+    enabled: yes
+    state: started
+
+- name: Update pg_hba.conf file
+  ansible.builtin.template:
+    src: pg_hba.conf
+    dest: /etc/postgresql/14/main/pg_hba.conf
+    owner: postgres
+    group: postgres
+    mode: "0600"
+  register: update_hba
+
+- name: Restart postgresql
+  ansible.builtin.service:
+    name: postgresql
+    state: restarted
+  when: "update_hba.changed == true"
+
+- name: Create nautobot database
+  community.postgresql.postgresql_db:
+    name: nautobot
+    state: present
+
+- name: Create nautobot database user account
+  community.postgresql.postgresql_user:
+    login_db: "{{ nautobot.db.name }}"
+    name: "{{ db_username }}"
+    password: "{{ db_password }}"
+    state: present
+
+- name: Grant all privileges on database nautobot to user nautobot
+  community.postgresql.postgresql_privs:
+    database: "{{ nautobot.db.name }}"
+    privs: ALL
+    type: database
+    role: "{{ db_username }}"
